@@ -37,7 +37,7 @@
       <div class="hero-copy">
         <p class="eyebrow"><span></span> WORKBOOK UTILITIES</p>
         <h1 id="page-title">Universal<br class="title-break"> Excel Cleaner<span>.</span></h1>
-        <p class="hero-description">Upload, clean, and download your Excel files instantly.</p>
+        <p class="hero-description">Remove empty columns and download a cleaner Excel workbook.</p>
       </div>
       <div class="hero-art" aria-hidden="true">
         <div class="sheet sheet-back"></div>
@@ -60,7 +60,6 @@
           <div class="panel-head">
             <div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg></div>
             <div><h2 id="upload-heading">Upload workbook</h2><p>Start with a single Excel file.</p></div>
-            <span class="step" aria-label="Step 1">01</span>
           </div>
           <input type="file" id="file" tabindex="-1" name="file" accept=".xlsx,.xls" hidden>
           <div id="dropzone" class="dropzone">
@@ -79,10 +78,28 @@
         <section class="panel options-panel" aria-labelledby="options-heading">
           <div class="panel-head">
             <div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></div>
-            <div><h2 id="options-heading">Cleaning options</h2><p>Choose which cell values to clear.</p></div>
-            <span class="step" aria-label="Step 2">02</span>
+            <div><h2 id="options-heading">Cleaning options</h2></div>
           </div>
-          <div class="options">
+          <label for="mode" class="field-label">Cleaning mode</label>
+          <select id="mode" class="form-select">
+            <option value="columns">Remove empty columns</option>
+            <option value="cells">Clear matching cells</option>
+          </select>
+          <div id="column-options">
+            <div class="header-setting">
+              <label for="header-mode"><strong>Header rows</strong><small>Counts from the first populated row of each sheet.</small></label>
+              <select id="header-mode" class="form-select">
+                <option value="auto">Auto detect</option>
+                <option value="manual">Manual count</option>
+              </select>
+            </div>
+            <label class="header-setting manual-header" id="manual-header" for="header-rows" hidden>
+              <span><strong>Rows to treat as headers</strong><small>Use 0 for sheets without headers.</small></span>
+              <input class="form-control" id="header-rows" type="number" min="0" max="100" step="1" value="1" required disabled>
+            </label>
+            <p class="mode-help">Blank cells, whitespace, NULL, and zero count as empty. Date, ID, Name, Status, Total, and Remarks columns stay.</p>
+          </div>
+          <div class="options" id="cell-options" hidden>
             <label class="option"><span><strong>Empty cells</strong><small>Clear empty strings</small></span><input class="form-check-input" type="checkbox" name="removeEmpty" checked></label>
             <label class="option"><span><strong>Whitespace-only cells</strong><small>Clear values made up of spaces or tabs</small></span><input class="form-check-input" type="checkbox" name="removeWhitespace" checked></label>
             <label class="option"><span><strong>Numeric zero</strong><small>Clear the number <code>0</code></small></span><input class="form-check-input" type="checkbox" name="removeNumericZero" checked></label>
@@ -90,11 +107,35 @@
           </div>
         </section>
       </div>
+      <section class="panel workbook-preview" id="preview" aria-labelledby="preview-title" hidden>
+        <div class="preview-heading">
+          <h2 id="preview-title">Worksheet preview</h2>
+          <div id="preview-sheet-control" hidden>
+            <label for="preview-sheet" class="field-label">Worksheet</label>
+            <select id="preview-sheet" class="form-select"></select>
+          </div>
+        </div>
+        <p id="preview-status" class="mode-help" role="status"></p>
+        <button id="preview-retry" type="button" class="secondary-button" hidden>Retry preview</button>
+        <div id="preview-grid" class="preview-grid" role="region" aria-label="Worksheet preview rows" tabindex="0" hidden>
+          <table id="preview-table"></table>
+        </div>
+        <div class="preview-navigation" id="preview-navigation" hidden>
+          <div role="group" aria-label="Browse rows">
+            <button id="previous-rows" type="button" class="secondary-button">Previous rows</button>
+            <button id="next-rows" type="button" class="secondary-button">Next rows</button>
+          </div>
+          <div role="group" aria-label="Browse columns">
+            <button id="previous-columns" type="button" class="secondary-button">Previous columns</button>
+            <button id="next-columns" type="button" class="secondary-button">Next columns</button>
+          </div>
+        </div>
+      </section>
       <div id="error" class="error" role="alert" hidden></div>
       <div class="action-bar">
         <div class="preserve">
           <div class="panel-icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></div>
-          <div><strong>Your workbook stays intact</strong><p>Formatting, formulas, and sheet layout are preserved.</p></div>
+          <div><strong id="mode-title">Keep every row</strong><p id="mode-note">Columns with data stay in their original order.</p></div>
         </div>
         <button id="submit" class="action-button" type="submit" disabled>
           <svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg>
@@ -114,7 +155,7 @@
       </div>
       <dl class="metrics">
         <div><dt>Worksheets processed</dt><dd id="sheets"></dd></div>
-        <div><dt>Cells cleared</dt><dd id="cells"></dd></div>
+        <div><dt id="changes-label">Columns removed</dt><dd id="changes"></dd></div>
         <div><dt>Processing time</dt><dd id="duration"></dd></div>
       </dl>
       <dl class="filenames">

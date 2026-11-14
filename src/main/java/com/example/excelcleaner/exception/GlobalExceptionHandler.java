@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     ResponseEntity<Map<String, String>> option() {
-        return response(HttpStatus.BAD_REQUEST, "Cleaning options must be true or false.");
+        return response(HttpStatus.BAD_REQUEST, "Use true or false for cleaning options and whole numbers for row and column positions.");
     }
 
     private ResponseEntity<Map<String, String>> response(HttpStatus status, String message) {
